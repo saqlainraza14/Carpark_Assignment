@@ -2,6 +2,7 @@
 
 
  Create a Directory for the Website
+ 
  Create a file called Dockerfile
  	 FROM nginx:alpine
  	 COPY . /usr/share/nginx/html
