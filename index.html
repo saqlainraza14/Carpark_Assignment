@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carpark Availability</title>
+<style>
+  h1 {
+    text-align: center;
+    color: darkgreen;
+  }
+  .box {
+    box-shadow:
+    0 2.8px 2.2px rgba(0, 0, 0, 0.034),
+    0 6.7px 5.3px rgba(0, 0, 0, 0.048),
+    0 12.5px 10px rgba(0, 0, 0, 0.06),
+    0 22.3px 17.9px rgba(0, 0, 0, 0.072),
+    0 41.8px 33.4px rgba(0, 0, 0, 0.086),
+    0 100px 80px rgba(0, 0, 0, 0.12);
+
+    text-align: center;  
+    vertical-align: middle;
+    padding-top: 1%;
+    min-height: 150px;
+    width: 30vw;
+    margin: 10px auto;
+    background: white;
+    border-radius: 5px;
+}
+</style>
+</head>
+<body>
+  <h1>Carpark Availability</h1>
+  <div id="carparkInfo"></div>
+
+  <script>
+    const carparkCategories = [
+      { name: "small", minLots: 0, maxLots: 100 },
+      { name: "medium", minLots: 100, maxLots: 300 },
+      { name: "big", minLots: 300, maxLots: 400 },
+      { name: "large", minLots: 400, maxLots: Infinity },
+    ];
+
+    async function fetchCarparkData() {
+      try {
+        const response = await fetch("https://api.data.gov.sg/v1/transport/carpark-availability");
+        const data = await response.json();
+        return data.items[0].carpark_data;
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+
+    //Getting different range of Category
+    function getCarparkCategory(totalLots) {
+      return carparkCategories.find(category =>
+        totalLots >= category.minLots && totalLots < category.maxLots
+      );
+    }
+
+    function updateCarparkInfo(carparkData) {
+      const carparkInfoDiv = document.getElementById("carparkInfo");
+      carparkInfoDiv.innerHTML = "";
+
+      carparkCategories.forEach(category => {
+        const carparksWithinCategory = carparkData.filter(carpark =>
+          getCarparkCategory(carpark.carpark_info[0].total_lots) === category
+        );
+
+        if (carparksWithinCategory.length > 0) {
+          carparksWithinCategory.sort((a, b) =>
+            a.carpark_info[0].lots_available - b.carpark_info[0].lots_available
+          );
+
+          const highestAvailable = carparksWithinCategory[carparksWithinCategory.length - 1];   //Hightest Available
+          const lowestAvailable = carparksWithinCategory[0];    //Lowest Available
+
+          const categoryInfo = `
+            <div class = 'box'>
+              <h2>${category.name.toUpperCase()}</h2>
+              <p><b>HIGHEST</b> (${highestAvailable.carpark_info[0].lots_available} lots available) at ${highestAvailable.carpark_number}</p>
+              <p><b>LOWEST</b> (${lowestAvailable.carpark_info[0].lots_available} lots available) at ${lowestAvailable.carpark_number}</p>
+            </div>  
+            `;
+
+          carparkInfoDiv.innerHTML += categoryInfo;
+        }
+      });
+    }
+
+    async function fetchDataAndRender() {
+      const carparkData = await fetchCarparkData();
+      if (carparkData) {
+        updateCarparkInfo(carparkData);
+      }
+    }
+
+    fetchDataAndRender();
+    setInterval(fetchDataAndRender, 60000); // Poll every 60 seconds
+  </script>
+</body>
+</html>
