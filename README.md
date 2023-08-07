@@ -1,18 +1,18 @@
 # Deploying a Static HTML Site with Docker
 
 
- Create a Directory for the Website
+ Create a Directory for the Website<br />
  
- Create a file called Dockerfile
- 	 FROM nginx:alpine
- 	 COPY . /usr/share/nginx/html
+ Create a file called Dockerfile<br />
+ 	 FROM nginx:alpine<br />
+ 	 COPY . /usr/share/nginx/html<br />
 
-Build the Docker Image
-  	docker build -t html-server-image:v1
+Build the Docker Image<br />
+  	docker build -t html-server-image:v1<br />
 
-Command to check all available image
-  	docker images
-Run the Docker Container
-  	docker run -d -p 8080:80 html-server-image:v1
-Test the Port
-  	http://localhost:8080/
+Command to check all available image<br />
+  	docker images<br />
+Run the Docker Container<br />
+  	docker run -d -p 8080:80 html-server-image:v1<br />
+Test the Port<br />
+  	http://localhost:8080/<br />
